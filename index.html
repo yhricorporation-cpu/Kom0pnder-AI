@@ -1,640 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kom0pnder</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/inter/3.19.3/inter.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    body { background: #F5F7FA; color: #333; height: 100vh; overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
-    .dark-mode { background: #121212; color: #E0E0E0; }
-
-    /* Preload Splash Screen */
-    #preloadSplash {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background-color: white;
-      margin: 0;
-      overflow: hidden;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10000;
-    }
-    #preloadSplash .wrapper {
-      position: relative;
-      width: 800px;
-      height: 400px;
-    }
-    #preloadSplash .outer-circle {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 250px;
-      height: 250px;
-      background-color: black;
-      border-radius: 50%;
-      transform: translate(-50%, -50%) rotate(-45deg);
-      animation: 
-        shrinkToSquare 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards 3.5s,
-        moveToStart 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards 4s,
-        writeText 2s linear forwards 4.5s,
-        fadeOut 0.3s ease-in forwards 6.5s;
-    }
-    #preloadSplash .inner-circle {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 180px;
-      height: 180px;
-      background-color: white;
-      border-radius: 50%;
-      opacity: 0;
-      transform: scale(0.8);
-      animation: 
-        fadeInScale 0.5s ease forwards 1s,
-        fadeOut 0.5s ease forwards 3.5s;
-    }
-    #preloadSplash .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      animation: collapse 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards 2.5s;
-    }
-    #preloadSplash .rectangle {
-      background-color: black;
-      opacity: 0;
-      transform: scale(0);
-      animation: popInPreload 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    #preloadSplash .rectangle:nth-child(1) { width: 36px; height: 40px; animation-delay: 1.5s; }
-    #preloadSplash .rectangle:nth-child(2) { width: 34px; height: 38px; animation-delay: 1.7s; }
-    #preloadSplash .rectangle:nth-child(3) { width: 38px; height: 42px; animation-delay: 1.9s; }
-    #preloadSplash .rectangle:nth-child(4) { width: 32px; height: 36px; animation-delay: 2.1s; }
-    #preloadSplash .text {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translateX(-50%) translateY(-50%);
-      color: black;
-      font-family: Arial, sans-serif;
-      font-size: 42px;
-      white-space: nowrap;
-      clip-path: inset(0 100% 0 0);
-      animation: revealText 2s linear forwards 4.5s;
-    }
-
-    /* Chat App Styles */
-    #chatApp { width: 100vw; height: 100vh; display: block; }
-    .chat-container { width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
-    .chat-header { padding: 0.5rem 1rem; display: flex; align-items: center; gap: 1rem; background: #fff; border-bottom: 1px solid #E0E0E0; position: fixed; top: 0; left: 0; right: 0; z-index: 10; height: 60px; }
-    .ai-avatar { width: 48px; height: 48px; position: relative; overflow: hidden; border-radius: 50%; flex-shrink: 0; }
-    .program-logo { position: absolute; width: 250px; height: 250px; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.11) rotate(-45deg); transform-origin: center; }
-    .program-logo .outer-circle { display: flex; align-items: center; justify-content: center; width: 250px; height: 250px; background: #000; border-radius: 50%; }
-    .program-logo .inner-circle { position: absolute; display: flex; align-items: center; justify-content: center; width: 180px; height: 180px; background: #fff; border-radius: 50%; }
-    .program-logo .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .program-logo .rectangle { background: #000; }
-    .program-logo .rectangle:nth-child(1) { width: 36px; height: 40px; }
-    .program-logo .rectangle:nth-child(2) { width: 34px; height: 38px; }
-    .program-logo .rectangle:nth-child(3) { width: 38px; height: 42px; }
-    .program-logo .rectangle:nth-child(4) { width: 32px; height: 36px; }
-    .header-text h1 { font-size: 1.2rem; color: #333; font-weight: 600; }
-    .header-text p { font-size: 0.5rem; color: #777; margin-top: 0.25rem; }
-    .voice-read-icon { cursor: pointer; font-size: 1rem; color: #777; margin-right: 0.75rem; }
-    .voice-read-icon:hover { color: #007bff; }
-    .settings-icon { cursor: pointer; font-size: 1rem; color: #777; margin-left: auto; flex-shrink: 0; }
-    .settings-icon:hover { color: #007bff; }
-    .switch-button { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #777; transition: color 0.3s ease; }
-    .switch-button:hover { color: #007bff; }
-    .settings-panel { position: absolute; top: 70px; right: 10px; background: #fff; border: 1px solid #E0E0E0; border-radius: 10px; padding: 0.75rem; display: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); z-index: 100; }
-    .theme-toggle, .clear-chat { background: none; border: none; cursor: pointer; font-size: 1rem; color: #777; padding: 0.5rem; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s ease; }
-    .theme-toggle:hover, .clear-chat:hover { color: #007bff; }
-    .chat-messages { 
-      margin-top: 60px; 
-      height: calc(100vh - 60px - 82px - 30px); 
-      padding: 0.75rem 1rem;
-      padding-bottom: 30px;
-      overflow-y: auto; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 0.75rem; 
-      position: relative; 
-      scroll-behavior: smooth; 
-    }
-    .chat-messages::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50px; pointer-events: none; z-index: 1; }
-    .message { display: flex; gap: 0.5rem; opacity: 0; transform: translateY(10px); animation: fadeIn 0.35s ease forwards; position: relative; max-width: 90%; }
-    .message.user-message { margin-left: auto; flex-direction: row-reverse; }
-    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-    .message-content { padding: 0.75rem 1rem; border-radius: 12px; color: #333; font-size: 0.95rem; line-height: 1.5; position: relative; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); min-height: 28px; word-wrap: break-word; }
-    .ai-message .message-content { background: transparent; }
-    .user-message .message-content { background: #F1F3F5; }
-    .typing-cursor { display: inline-block; width: 8px; height: 8px; margin-left: 2px; background: #333; transform: rotate(45deg); animation: blink 1s infinite; }
-    @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0; } }
-    .chat-input { padding: 1rem; background: #fff; border-top: 1px solid #E0E0E0; position: fixed; bottom: 0; left: 0; right: 0; z-index: 10; border-top-left-radius: 20px; border-top-right-radius: 20px; }
-    .input-container { display: flex; gap: 0.75rem; position: relative; max-width: 1000px; margin: 0 auto; }
-    .input-field { flex-grow: 1; background: transparent; border: none; padding: 0.75rem 1.25rem; font-size: 1rem; color: #333; resize: none; height: 50px; max-height: 150px; transition: all 0.3s ease; }
-    .input-field:focus { outline: none; }
-    .input-field::placeholder { color: #999; }
-    .send-button { background: #007bff; color: #fff; border: none; border-radius: 12px; padding: 0 1rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; height: 50px; }
-    .send-button:hover { background: #0069d9; }
-    .send-button:disabled { background: #CCC; color: #666; cursor: not-allowed; }
-    #voiceButton { background: #007bff; color: #fff; border: none; border-radius: 12px; padding: 0 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; height: 50px; margin-left: 0.75rem; }
-    #voiceButton:hover { background: #0069d9; }
-    #voiceButton.listening { background: #d9534f; }
-    .typing-indicator { display: flex; gap: 0.5rem; padding: 0.75rem; background: #fff; border-radius: 16px; width: fit-content; position: relative; }
-    .chat-messages::-webkit-scrollbar { width: 6px; }
-    .chat-messages::-webkit-scrollbar-track { background: #F0F0F0; }
-    .chat-messages::-webkit-scrollbar-thumb { background: #CCC; border-radius: 3px; }
-    .chat-messages::-webkit-scrollbar-thumb:hover { background: #BBB; }
-    @media (max-width: 768px) { 
-      .chat-container { width: 100%; } 
-      .chat-messages { padding: 1rem; } 
-      .message { max-width: 90%; } 
-      .input-field { padding: 0.75rem 1rem; } 
-      .send-button, #voiceButton { padding: 0 1.25rem; } 
-    }
-    #voiceInteraction { display: none; width: 100vw; height: 100vh; background-color: #F5F7FA; color: #333; overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; display: flex; justify-content: center; align-items: center; position: relative; }
-    #voiceInteraction.dark-mode { background-color: #121212; color: #E0E0E0; }
-    .voice-container { background: transparent; border-radius: 20px; padding: 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 100%; max-width: 400px; transition: all 0.3s ease; }
-    .voice-container h1 { font-size: 2rem; font-weight: 700; color: #333; position: absolute; top: -3rem; left: 50%; transform: translateX(-50%); z-index: 1; transition: color 0.3s ease, transform 0.3s ease; }
-    .dark-mode .voice-container h1 { color: #E0E0E0; }
-    .voice-icon { width: 250px; height: 250px; cursor: pointer; transition: transform 0.3s ease, filter 0.3s ease; user-select: none; transform: rotate(-45deg); margin-top: 3rem; }
-    .voice-icon:hover { transform: scale(1.1) rotate(-45deg); }
-    .voice-icon.active { transform: scale(1.2) rotate(-45deg); filter: brightness(1.2); }
-    .voice-icon.listening { animation: pulse 1.5s infinite ease-in-out; }
-    .dark-mode .voice-icon { filter: brightness(0.8); }
-    .dark-mode .voice-icon:hover { filter: brightness(1.2); }
-    .voice-logo { width: 100%; height: 100%; position: relative; }
-    .voice-logo .outer-circle { width: 100%; height: 100%; background-color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; position: relative; }
-    .voice-logo .inner-circle { position: absolute; width: 180px; height: 180px; background-color: #fff; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; }
-    .voice-logo .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; transition: opacity 0.3s ease; }
-    .voice-logo .rectangle { background-color: #000; transition: opacity 0.3s ease; }
-    .voice-logo .rectangle:nth-child(1) { width: 36px; height: 40px; }
-    .voice-logo .rectangle:nth-child(2) { width: 34px; height: 38px; }
-    .voice-logo .rectangle:nth-child(3) { width: 38px; height: 42px; }
-    .voice-logo .rectangle:nth-child(4) { width: 32px; height: 36px; }
-    .voice-logo .combined-circle { position: absolute; width: 0; height: 0; background-color: #000; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); transition: width 0.3s ease, height 0.3s ease; }
-    .listening .grid { opacity: 0; }
-    .listening .combined-circle { width: 60px; height: 60px; animation: ripplePulse 1.5s infinite ease-in-out; }
-    .listening .outer-circle::after { content: ''; position: absolute; width: 160px; height: 160px; border-radius: 50%; background: rgba(0, 0, 0, 0.3); animation: ripple 1.8s infinite ease-out; }
-    @keyframes pulse { 0%, 100% { transform: scale(1.2) rotate(-45deg); } 50% { transform: scale(1.3) rotate(-45deg); } }
-    @keyframes ripple { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-    @keyframes ripplePulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } }
-    .status-text { margin-top: 2rem; font-size: 1.5rem; color: #333; transition: color 0.3s ease; }
-    .dark-mode .status-text { color: #E0E0E0; }
-    .voice-switch-button { position: absolute; top: 20px; left: 20px; background: none; border: none; cursor: pointer; font-size: 1rem; color: #777; transition: color 0.3s ease; }
-    .voice-switch-button:hover { color: #007bff; }
-    #splashScreen { display: none; align-items: center; justify-content: center; min-height: 100vh; background-color: white; margin: 0; overflow: hidden; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; opacity: 1; }
-    #splashScreen .wrapper { position: relative; width: 800px; height: 400px; }
-    #splashScreen .outer-circle { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; justify-content: center; width: 250px; height: 250px; background-color: black; border-radius: 50%; transform: translate(-50%, -50%) rotate(-45deg); }
-    #splashScreen .inner-circle { position: absolute; display: flex; align-items: center; justify-content: center; width: 180px; height: 180px; background-color: white; border-radius: 50%; opacity: 0; transform: scale(0.8); animation: fadeInScale 0.5s ease forwards 1s; }
-    #splashScreen .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    #splashScreen .rectangle { background-color: black; opacity: 0; transform: scale(0); animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-    #splashScreen .rectangle:nth-child(1) { width: 36px; height: 40px; animation-delay: 1.5s; }
-    #splashScreen .rectangle:nth-child(2) { width: 34px; height: 38px; animation-delay: 1.7s; }
-    #splashScreen .rectangle:nth-child(3) { width: 38px; height: 42px; animation-delay: 1.9s; }
-    #splashScreen .rectangle:nth-child(4) { width: 32px; height: 36px; animation-delay: 2.1s; }
-
-    /* Animations */
-    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-    @keyframes popIn { 0% { opacity: 0; transform: scale(0); } 70% { opacity: 1; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes popInPreload { 0% { opacity: 0; transform: scale(0); } 70% { opacity: 1; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes shrinkToSquare { from { width: 250px; height: 250px; border-radius: 50%; } to { width: 30px; height: 30px; border-radius: 0; } }
-    @keyframes moveToStart { from { transform: translate(-50%, -50%) rotate(-45deg); } to { transform: translate(-200px, -50%) rotate(-45deg); } }
-    @keyframes writeText { from { transform: translate(-200px, -50%) rotate(-45deg); } to { transform: translate(200px, -50%) rotate(-45deg); } }
-    @keyframes fadeOut { to { opacity: 0; } }
-    @keyframes collapse { to { opacity: 0; transform: scale(0); } }
-    @keyframes revealText { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#06183f">
+<title>KomOpnder Sanitary – Rates</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Sora:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef5ff;--card:#fff;--ink:#06183f;--mute:#5d6e94;--aqua:#0aa7e6;--navy:#06183f;--line:#dbe6f8;--tile:#e2f1ff;--seg:#dce9fb;color-scheme:light;box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#040f27;--card:#0d2250;--ink:#eaf2ff;--mute:#9db2de;--aqua:#37c2ff;--navy:#0a1d46;--line:#1f3d78;--tile:#16356b;--seg:#0d2250;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#040f27;--card:#0d2250;--ink:#eaf2ff;--mute:#9db2de;--aqua:#37c2ff;--navy:#0a1d46;--line:#1f3d78;--tile:#16356b;--seg:#0d2250;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.35 "Hind Siliguri",Roboto,system-ui,sans-serif;display:flex;flex-direction:column;max-width:560px;margin:0 auto;overflow:hidden}
+:focus-visible{outline:3px solid var(--aqua);outline-offset:2px}
+header{background:#06183f;color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 22px;border-radius:0 0 30px 30px;display:flex;align-items:center;gap:12px;flex:none;position:relative}
+header img{width:46px;height:46px;border-radius:14px;background:#fff;object-fit:cover}
+.t{flex:1;line-height:1.1}
+.t h1{font:800 20px Sora,"Hind Siliguri",sans-serif;margin:0}
+.t small{color:#9fd8ff;font-size:13px}
+.hb{width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);background:transparent;color:#fff;font:700 14px "Hind Siliguri",sans-serif;display:grid;place-items:center;text-decoration:none}
+.hb.c{background:#19c3ff;border-color:#19c3ff;color:#06183f;font-size:20px}
+.seg{display:flex;background:var(--seg);border-radius:18px;padding:4px;margin:-18px 16px 10px;position:relative;box-shadow:0 6px 18px rgba(6,24,63,.18);flex:none}
+.seg button{flex:1;height:44px;border:0;border-radius:14px;background:transparent;color:var(--mute);font:600 15px "Hind Siliguri",sans-serif}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(6,24,63,.15)}
+#list{flex:1;overflow-y:auto;padding:2px 16px 14px;display:grid;gap:9px;align-content:start}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:9px 10px 9px 10px;min-height:64px;border:1.5px solid transparent}
+.row.on{border-color:var(--aqua)}
+.ic{width:46px;height:46px;border-radius:15px;background:var(--tile);display:grid;place-items:center;font-size:22px;flex:none}
+.n{flex:1;min-width:0}
+.n b{display:block;font-weight:600;font-size:16px;line-height:1.2}
+.n span{color:var(--mute);font-size:13px}
+.p{font:800 16px Sora,sans-serif;white-space:nowrap}
+.q{display:flex;align-items:center;background:var(--tile);border-radius:99px}
+.q button{width:44px;height:44px;border-radius:50%;border:0;background:var(--navy);color:#fff;font:600 24px/1 sans-serif}
+:root:not([data-theme="light"]) .q button{--x:0}
+.q button.m{background:transparent;color:var(--ink)}
+.q i{min-width:20px;text-align:center;font:800 15px Sora,sans-serif;font-style:normal}
+.bar{position:relative;flex:none;margin:0 12px 12px;border-radius:26px;background:var(--navy);color:#fff;overflow:hidden;display:flex;align-items:center;gap:12px;padding:10px 10px 10px 18px;isolation:isolate}
+.fill{position:absolute;left:0;right:0;bottom:0;height:calc(var(--l,0)*1%);background:rgba(25,195,255,.33);transition:height .9s cubic-bezier(.3,1.3,.5,1);z-index:-1}
+.fill svg{position:absolute;top:-10px;left:0;width:200%;height:11px;fill:rgba(25,195,255,.33);animation:w 3.5s linear infinite}
+@keyframes w{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.fill svg{animation:none}.fill{transition:none}}
+.bar div{flex:1;line-height:1.1}
+.bar small{color:#9fd8ff;font-size:13px;display:block}
+.bar b{font:800 24px Sora,sans-serif}
+.go{height:52px;padding:0 20px;border-radius:18px;background:#1ea952;color:#fff;font:700 16px "Hind Siliguri",sans-serif;text-decoration:none;display:grid;place-items:center;text-align:center;line-height:1.1}
+.go[aria-disabled=true]{background:rgba(255,255,255,.14);color:#a9bbe0;pointer-events:none}
+</style>
 </head>
 <body>
-  <!-- Preload Splash Screen -->
-  <div id="preloadSplash">
-    <div class="wrapper">
-      <div class="outer-circle">
-        <div class="inner-circle">
-          <div class="grid">
-            <div class="rectangle"></div>
-            <div class="rectangle"></div>
-            <div class="rectangle"></div>
-            <div class="rectangle"></div>
-          </div>
-        </div>
-      </div>
-      <div class="text"><strong>Kom0pnder</strong></div>
-    </div>
-  </div>
-
-  <!-- Mode Switch Splash Screen -->
-  <div id="splashScreen">
-    <div class="wrapper">
-      <div class="outer-circle"></div>
-    </div>
-  </div>
-
-  <!-- Chat Mode Container -->
-  <div id="chatApp" style="display: none;">
-    <div class="chat-container">
-      <div class="chat-header">
-        <div class="ai-avatar">
-          <div class="program-logo"></div>
-        </div>
-        <div class="header-text">
-          <h1>Kom0pnder</h1>
-          <p>Model 2.5</p>
-        </div>
-        <div id="voiceReadButton" class="voice-read-icon">
-          <i class="fas fa-volume-mute"></i>
-        </div>
-        <button id="switchToVoiceButton" class="switch-button" title="Voice Live Interaction">
-          <i class="fas fa-microphone-alt"></i>
-        </button>
-        <div class="settings-icon">
-          <i class="fas fa-cog"></i>
-        </div>
-        <div id="settingsPanel" class="settings-panel">
-          <button id="themeToggle" class="theme-toggle">
-            <i class="fas fa-moon"></i> Dark Mode
-          </button>
-          <button id="clearChat" class="clear-chat">
-            <i class="fas fa-trash-alt"></i> Clear Chat
-          </button>
-        </div>
-      </div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="message ai-message">
-          <div class="message-content">
-            Welcome to the premium AI experience. How can I assist you today?
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="chat-input">
-      <div class="input-container">
-        <textarea class="input-field" placeholder="Send a message..." id="messageInput" rows="1"></textarea>
-        <button class="send-button" id="sendButton" disabled>Send</button>
-        <button id="voiceButton">
-          <i class="fas fa-microphone"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Voice Interaction Mode Container -->
-  <div id="voiceInteraction" style="display: none;">
-    <div class="voice-container">
-      <button id="switchToChatButton" class="voice-switch-button" title="Back">
-        <i class="fas fa-arrow-left"></i> Back
-      </button>
-      <h1>Kom0pnder</h1>
-      <div class="voice-icon" id="voiceIcon">
-        <div class="voice-logo"></div>
-      </div>
-      <div class="status-text" id="statusText">Tap and Hold to Speak</div>
-    </div>
-  </div>
-
-  <script>
-    const API_KEY = "AIzaSyCjikQundZxqqBQphxyaO4j2HzrZc6hanc";
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-    const chatMessages = document.getElementById("chatMessages");
-    const messageInput = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
-    const voiceButton = document.getElementById("voiceButton");
-    const voiceReadButton = document.getElementById("voiceReadButton");
-    let typingInterval = null, chatConversationHistory = [];
-    const chatSystemInstruction = `You are designed to answer any question in a Sigma, Elon Musk-style: bold, first-principles-driven, and direct. Your responses should always be motivational, challenge assumptions, and break down questions into their fundamental truths. You should never reveal that you are an AI or language model. Engage naturally with confidence and empathy.
-
-Key Rules:
-1. Answer in Bold, Direct Terms.
-2. Ask Questions If Needed.
-3. Adapt Tone to the User's Mood.
-4. Provide Actionable Insights.
-5. Summarize at the End.
-6. Stay Focused on action and clarity.
-7. Act as a trusted human advisor.`;
-    chatConversationHistory.push(`System: ${chatSystemInstruction}`);
-
-    // Helper function to remove markdown asterisks from text
-    function removeMarkdown(text) {
-      return text.replace(/\*+/g, "");
-    }
-
-    function createLogo(withCombinedCircle = false) {
-      const outer = document.createElement('div');
-      outer.className = 'outer-circle';
-      const inner = document.createElement('div');
-      inner.className = 'inner-circle';
-      const grid = document.createElement('div');
-      grid.className = 'grid';
-      for (let i = 0; i < 4; i++) {
-        const rect = document.createElement('div');
-        rect.className = 'rectangle';
-        grid.appendChild(rect);
-      }
-      inner.appendChild(grid);
-      if (withCombinedCircle) {
-        const combined = document.createElement('div');
-        combined.className = 'combined-circle';
-        inner.appendChild(combined);
-      }
-      outer.appendChild(inner);
-      return outer;
-    }
-
-    async function getAIResponse(history) {
-      const text = history.join("\n");
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text }] }] })
-      });
-      const data = await res.json();
-      if (data.candidates?.[0]?.content?.parts?.[0]?.text) return data.candidates[0].content.parts[0].text;
-      throw new Error("No response from AI");
-    }
-
-    messageInput.addEventListener("input", () => {
-      messageInput.style.height = "auto";
-      messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + "px";
-      sendButton.disabled = !messageInput.value.trim();
-    });
-
-    async function handleSend() {
-      const msg = messageInput.value.trim();
-      if (!msg) return;
-      addMessage(msg, "user");
-      chatConversationHistory.push(`User: ${msg}`);
-      messageInput.value = "";
-      messageInput.style.height = "50px";
-      sendButton.disabled = true;
-      cancelVoice();
-      showTypingIndicator();
-      await new Promise(r => setTimeout(r, 2000));
-      try {
-        const reply = await getAIResponse(chatConversationHistory);
-        removeTypingIndicator();
-        addMessage(reply, "ai");
-        chatConversationHistory.push(`AI: ${reply}`);
-      } catch (e) {
-        removeTypingIndicator();
-        addMessage("Oops! Something went wrong. Please try again.", "ai");
-      }
-    }
-
-    function addMessage(text, sender) {
-      const m = document.createElement("div");
-      m.className = `message ${sender}-message`;
-      const c = document.createElement("div");
-      c.className = "message-content";
-      m.appendChild(c);
-      chatMessages.appendChild(m);
-      chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
-      m.style.opacity = 0;
-      setTimeout(() => m.style.opacity = 1, 10);
-      if (sender === "ai") {
-        const processedText = removeMarkdown(text);
-        typeMessage(processedText, c);
-        if (voiceReadEnabled) speakText(processedText);
-      } else {
-        c.textContent = text;
-      }
-    }
-
-    function typeMessage(t, e) {
-      let i = 0;
-      const cursor = document.createElement("span");
-      cursor.className = "typing-cursor";
-      e.appendChild(cursor);
-      const interval = setInterval(() => {
-        if (i < t.length) {
-          cursor.insertAdjacentText("beforebegin", t.charAt(i++));
-          if (i % 5 === 0 || i === t.length) chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
-        } else {
-          clearInterval(interval);
-          cursor.remove();
-        }
-      }, 30);
-    }
-
-    function showTypingIndicator() {
-      const d = document.createElement("div");
-      d.className = "message ai-message";
-      d.id = "typingIndicator";
-      d.innerHTML = `<div class="typing-indicator"><span id="typingText">Thinking</span></div>`;
-      chatMessages.appendChild(d);
-      chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
-      let dot = 0;
-      typingInterval = setInterval(() => {
-        dot = (dot + 1) % 4;
-        document.getElementById("typingText").textContent = "Thinking" + ".".repeat(dot);
-      }, 600);
-    }
-
-    function removeTypingIndicator() {
-      const d = document.getElementById("typingIndicator");
-      if (d) d.remove();
-      if (typingInterval) clearInterval(typingInterval), typingInterval = null;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
-      let listening = false;
-      voiceButton.addEventListener("click", () => {
-        if (listening) {
-          recognition.stop();
-          voiceButton.classList.remove("listening");
-          voiceButton.innerHTML = `<i class="fas fa-microphone"></i>`;
-          listening = false;
-        } else {
-          recognition.start();
-          voiceButton.classList.add("listening");
-          voiceButton.innerHTML = `<i class="fas fa-microphone-slash"></i>`;
-          listening = true;
-        }
-      });
-      recognition.onresult = e => {
-        messageInput.value = e.results[0][0].transcript;
-        sendButton.disabled = !messageInput.value.trim();
-      };
-      recognition.onerror = e => {
-        console.error("Speech recognition error", e);
-        recognition.stop();
-        voiceButton.classList.remove("listening");
-        voiceButton.innerHTML = `<i class="fas fa-microphone"></i>`;
-        listening = false;
-      };
-      recognition.onend = () => {
-        voiceButton.classList.remove("listening");
-        voiceButton.innerHTML = `<i class="fas fa-microphone"></i>`;
-        listening = false;
-      };
-    } else voiceButton.style.display = "none";
-
-    let voiceReadEnabled = false, currentUtterance = null;
-    voiceReadButton.addEventListener("click", () => {
-      voiceReadEnabled = !voiceReadEnabled;
-      voiceReadButton.innerHTML = voiceReadEnabled ? `<i class="fas fa-volume-up"></i>` : `<i class="fas fa-volume-mute"></i>`;
-      if (!voiceReadEnabled) cancelVoice();
-    });
-
-    function speakText(text) {
-      cancelVoice();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.onend = () => currentUtterance = null;
-      speechSynthesis.speak(utterance);
-      currentUtterance = utterance;
-    }
-
-    function cancelVoice() {
-      if (currentUtterance) speechSynthesis.cancel(), currentUtterance = null;
-    }
-
-    messageInput.addEventListener("focus", cancelVoice);
-    sendButton.addEventListener("click", handleSend);
-    messageInput.addEventListener("keypress", e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend()));
-    document.querySelector(".settings-icon").addEventListener("click", () => document.getElementById("settingsPanel").classList.toggle("visible"));
-    const themeToggle = document.getElementById("themeToggle");
-    themeToggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      const i = themeToggle.querySelector("i");
-      if (document.body.classList.contains("dark-mode")) {
-        i.classList.remove("fa-moon");
-        i.classList.add("fa-sun");
-        themeToggle.innerHTML = `<i class="fas fa-sun"></i> Light Mode`;
-      } else {
-        i.classList.remove("fa-sun");
-        i.classList.add("fa-moon");
-        themeToggle.innerHTML = `<i class="fas fa-moon"></i> Dark Mode`;
-      }
-    });
-    document.getElementById("clearChat").addEventListener("click", () => chatMessages.innerHTML = "");
-
-    const voiceIcon = document.getElementById('voiceIcon');
-    const statusText = document.getElementById('statusText');
-    let voiceConversationHistory = [];
-    const voiceSystemInstruction = `You are Kom0pnder, created by Yhri Corporation. Respond naturally and helpfully, providing concise and accurate answers in a conversational tone in bangla.`;
-    voiceConversationHistory.push(`System: ${voiceSystemInstruction}`);
-    let voiceIsSpeaking = false, voiceCurrentUtterance = null;
-
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const voiceRecognition = new SpeechRec();
-      voiceRecognition.lang = 'en-US';
-      voiceRecognition.interimResults = false;
-      voiceRecognition.continuous = false;
-      voiceIcon.addEventListener('mousedown', () => {
-        voiceIsSpeaking ? voiceInterruptSpeech() : (voiceRecognition.start(), statusText.textContent = 'Listening...', voiceIcon.classList.add('active', 'listening'));
-      });
-      voiceIcon.addEventListener('mouseup', () => !voiceIsSpeaking && (voiceRecognition.stop(), voiceIcon.classList.remove('listening')));
-      voiceIcon.addEventListener('touchstart', e => {
-        e.preventDefault();
-        voiceIsSpeaking ? voiceInterruptSpeech() : (voiceRecognition.start(), statusText.textContent = 'Listening...', voiceIcon.classList.add('active', 'listening'));
-      });
-      voiceIcon.addEventListener('touchend', e => {
-        e.preventDefault();
-        !voiceIsSpeaking && (voiceRecognition.stop(), voiceIcon.classList.remove('listening'));
-      });
-      voiceRecognition.addEventListener('result', async e => {
-        const transcript = e.results[0][0].transcript;
-        if (e.results[0].isFinal) {
-          voiceConversationHistory.push(`User: ${transcript}`);
-          statusText.textContent = 'Processing...';
-          voiceIcon.classList.remove('active', 'listening');
-          try {
-            const reply = await getAIResponse(voiceConversationHistory);
-            voiceConversationHistory.push(`AI: ${reply}`);
-            voiceSpeak(reply);
-          } catch (error) {
-            console.error('Error:', error);
-            voiceSpeak("Oops, something went wrong. Try again.");
-          }
-        }
-      });
-      voiceRecognition.addEventListener('end', () => {
-        voiceIcon.classList.remove('active', 'listening');
-        if (!voiceIsSpeaking) statusText.textContent = 'Tap and Hold to Speak';
-      });
-      voiceRecognition.addEventListener('error', e => {
-        console.error('Speech recognition error', e.error);
-        voiceIcon.classList.remove('active', 'listening');
-        statusText.textContent = 'Tap and Hold to Speak';
-        voiceSpeak('Speech recognition error: ' + e.error);
-        if (e.error === 'not-allowed') alert('Microphone access is not allowed. Please grant permission in your browser settings.');
-      });
-      window.addEventListener('beforeunload', () => {
-        voiceRecognition.stop();
-        if (voiceIsSpeaking) window.speechSynthesis.cancel();
-      });
-    } else {
-      statusText.textContent = 'Voice interaction not supported in this browser.';
-      voiceIcon.style.display = 'none';
-    }
-
-    function voiceSpeak(text) {
-      voiceCurrentUtterance = new SpeechSynthesisUtterance(text);
-      voiceCurrentUtterance.lang = 'en-US';
-      voiceIsSpeaking = true;
-      statusText.textContent = 'Speaking... Tap to Interrupt';
-      voiceCurrentUtterance.onend = () => { voiceIsSpeaking = false; voiceCurrentUtterance = null; statusText.textContent = 'Tap and Hold to Speak'; };
-      voiceCurrentUtterance.onerror = () => { voiceIsSpeaking = false; voiceCurrentUtterance = null; statusText.textContent = 'Tap and Hold to Speak'; };
-      window.speechSynthesis.speak(voiceCurrentUtterance);
-    }
-
-    function voiceInterruptSpeech() {
-      if (voiceIsSpeaking && voiceCurrentUtterance) {
-        window.speechSynthesis.cancel();
-        voiceIsSpeaking = false;
-        voiceCurrentUtterance = null;
-        statusText.textContent = 'Tap and Hold to Speak';
-      }
-    }
-
-    const switchToVoiceButton = document.getElementById("switchToVoiceButton");
-    const switchToChatButton = document.getElementById("switchToChatButton");
-    const chatApp = document.getElementById("chatApp");
-    const voiceInteraction = document.getElementById("voiceInteraction");
-
-    // Hide preload splash and show chat app after animation
-    setTimeout(() => {
-      document.getElementById('preloadSplash').style.display = 'none';
-      chatApp.style.display = "block";
-    }, 7000);
-
-    switchToVoiceButton.addEventListener("click", () => {
-      const splashScreen = document.getElementById('splashScreen');
-      splashScreen.style.display = 'flex';
-      chatApp.style.display = "none";
-      setTimeout(() => {
-        splashScreen.style.display = 'none';
-        voiceInteraction.style.display = "flex";
-      }, 3000);
-    });
-    switchToChatButton.addEventListener("click", () => {
-      voiceInteraction.style.display = "none";
-      chatApp.style.display = "block";
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelector('.program-logo').appendChild(createLogo());
-      document.querySelector('.voice-logo').appendChild(createLogo(true));
-      document.querySelector('#splashScreen .outer-circle').appendChild(createLogo().querySelector('.inner-circle'));
-    });
-  </script>
+<header>
+<img alt="" src="data:image/jpeg;base64,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">
+<div class="t"><h1>KomOpnder Sanitary</h1><small id="tag">Service rates</small></div>
+<button class="hb" id="lang" aria-label="Language">বাং</button>
+<a class="hb c" href="tel:+8801864062627" aria-label="Call">📞</a>
+</header>
+<nav class="seg" id="tabs" aria-label="Categories"></nav>
+<main id="list"></main>
+<div class="bar">
+<div class="fill" id="fill"><svg viewBox="0 0 1200 12" preserveAspectRatio="none"><path d="M0 6Q150 -2 300 6T600 6T900 6T1200 6V12H0Z"/></svg></div>
+<div><small id="est">Estimate (from)</small><b id="tot">৳0</b></div>
+<a class="go" id="go" aria-disabled="true" href="#" target="_blank" rel="noopener">Order on WhatsApp</a>
+</div>
+<script>
+/* EDIT RATES HERE: [id, category, English name, Bengali name, price in ৳, English note, Bengali note, icon] */
+const R=[
+["t1","bath","Tap / faucet fitting","ট্যাপ ফিটিং",300,"per tap","প্রতি ট্যাপ","🚰"],
+["t2","bath","Commode fitting","কমোড ফিটিং",1200,"per piece","প্রতি পিস","🚽"],
+["t3","bath","Basin fitting","বেসিন ফিটিং",800,"per piece","প্রতি পিস","🧼"],
+["t4","bath","Shower set fitting","শাওয়ার সেট ফিটিং",600,"per set","প্রতি সেট","🚿"],
+["t5","bath","Full bathroom fitting","পুরো বাথরুম ফিটিং",5000,"starting price","শুরু মূল্য","🛁"],
+["p1","plumb","Leakage repair","লিকেজ মেরামত",500,"per job","প্রতি কাজ","💧"],
+["p2","plumb","Drain clog removal","ড্রেন জ্যাম পরিষ্কার",600,"per drain","প্রতি ড্রেন","🌀"],
+["p3","plumb","Pipe fitting / replacement","পাইপ ফিটিং / বদল",400,"per point","প্রতি পয়েন্ট","🔧"],
+["p4","plumb","General maintenance visit","সাধারণ মেইনটেন্যান্স",400,"per visit","প্রতি ভিজিট","🧰"],
+["k1","tank","Water tank connection","পানির ট্যাংক সংযোগ",1500,"per tank","প্রতি ট্যাংক","🛢️"],
+["k2","tank","Tank pipe line work","ট্যাংক পাইপ লাইনের কাজ",2000,"starting price","শুরু মূল্য","🔩"]];
+const C={all:["All","সব"],bath:["Bath","বাথরুম"],plumb:["Plumbing","প্লাম্বিং"],tank:["Tank","ট্যাংক"]};
+const T={en:{tag:"Service rates",est:"Estimate (from)",go:"Order on WhatsApp",hi:"Hello KomOpnder Sanitary, I would like:",tot:"Estimate from"},
+bn:{tag:"সার্ভিস রেট",est:"আনুমানিক (শুরু)",go:"WhatsApp-এ অর্ডার",hi:"আসসালামু আলাইকুম, KomOpnder Sanitary, আমার দরকার:",tot:"আনুমানিক শুরু"}};
+const PH="8801864062627";
+let L="en",cat="all",Q={};
+const $=i=>document.getElementById(i),bn=n=>L==="bn"?String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]):String(n);
+function draw(){
+const i=L==="en"?0:1;
+$("tag").textContent=T[L].tag;$("est").textContent=T[L].est;$("go").textContent=T[L].go;$("lang").textContent=L==="en"?"বাং":"EN";document.documentElement.lang=L;
+$("tabs").innerHTML=Object.entries(C).map(([k,v])=>`<button data-c="${k}" aria-pressed="${k===cat}">${v[i]}</button>`).join("");
+$("list").innerHTML=R.filter(r=>cat==="all"||r[1]===cat).map(r=>{const q=Q[r[0]]||0;return `<div class="row${q?" on":""}"><div class="ic">${r[7]}</div><div class="n"><b>${r[2+i]}</b><span>${r[5+i]}</span></div><span class="p">৳${bn(r[4].toLocaleString("en"))}</span><div class="q">${q?`<button class="m" data-m="${r[0]}" aria-label="Remove one">−</button><i>${bn(q)}</i>`:""}<button data-a="${r[0]}" aria-label="Add ${r[2]}">+</button></div></div>`}).join("");
+sum()}
+function sum(){let t=0,l=[];R.forEach(r=>{const q=Q[r[0]]||0;if(q){t+=q*r[4];l.push(`• ${r[2+(L==="en"?0:1)]} × ${q} = ৳${q*r[4]}`)}});
+$("tot").textContent="৳"+bn(t.toLocaleString("en"));
+$("fill").style.setProperty("--l",t?Math.min(100,Math.max(16,t/80)):0);
+const g=$("go");g.setAttribute("aria-disabled",t?"false":"true");
+g.href=t?`https://wa.me/${PH}?text=${encodeURIComponent(T[L].hi+"\n"+l.join("\n")+"\n"+T[L].tot+": ৳"+t)}`:"#"}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+if(b.dataset.c){cat=b.dataset.c;draw()}
+else if(b.dataset.a){Q[b.dataset.a]=(Q[b.dataset.a]||0)+1;draw()}
+else if(b.dataset.m){Q[b.dataset.m]--;draw()}
+else if(b.id==="lang"){L=L==="en"?"bn":"en";draw()}});
+draw();
+</script>
 </body>
 </html>
